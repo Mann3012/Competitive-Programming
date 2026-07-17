@@ -24,39 +24,181 @@ struct Node{
     }
 };
 
-void inorderDriver(vector<int>&inorder,const Node*root){
+void inorderHelper(vector<int>&inorder,const Node*root){
     if(root==nullptr) return;
-    inorderDriver(inorder,root->left);
+    inorderHelper(inorder,root->left);
     inorder.push_back(root->data);
-    inorderDriver(inorder,root->right);
+    inorderHelper(inorder,root->right);
 }
 vector<int> inorderTraversal(const Node* root){
     vector<int> inorder;
-    inorderDriver(inorder,root);
+    inorderHelper(inorder,root);
     return inorder;
 }
-void preorderDriver(vector<int>&preorder,const Node*root){
+void preorderHelper(vector<int>&preorder,const Node*root){
     if(root==nullptr) return;
     preorder.push_back(root->data);
-    preorderDriver(preorder,root->left);
-    preorderDriver(preorder,root->right);
+    preorderHelper(preorder,root->left);
+    preorderHelper(preorder,root->right);
 }
 vector<int> preorderTraversal(const Node* root){
     vector<int> preorder;
-    preorderDriver(preorder,root);
+    preorderHelper(preorder,root);
     return preorder;
 }
-
-
-
-void postorderDriver(vector<int>&postorder,const Node*root){
+void postorderHelper(vector<int>&postorder,const Node*root){
     if(root==nullptr) return;
-    postorderDriver(postorder,root->left);
-    postorderDriver(postorder,root->right);
+    postorderHelper(postorder,root->left);
+    postorderHelper(postorder,root->right);
     postorder.push_back(root->data);
 }
 vector<int> postorderTraversal(const Node* root){
     vector<int> postorder;
-    postorderDriver(postorder,root);
+    postorderHelper(postorder,root);
     return postorder;
+}
+vector<vector<int>> levelOrderTraversal(const Node* root){
+    if(!root) return {};
+    vector<vector<int>> levelOrder;
+    queue<const Node*> q;
+    q.push(root);
+    while(!q.empty()){
+        int sz=q.size();
+        vector<int> currLevel;
+        for(int i=0;i<sz;i++){
+            auto node=q.front();
+            q.pop();
+            currLevel.push_back(node->data);
+            if(node->left) q.push(node->left);
+            if(node->right) q.push(node->right);
+        }
+        levelOrder.push_back(currLevel);
+    }
+    return levelOrder;
+}
+
+
+vector<int> inorderIterative(const Node* root){
+    vector<int> ans;
+    if(!root) return ans;
+    const Node* node=root;
+    stack<const Node*> st;
+    while(!st.empty() || node){
+        if(node){
+            st.push(node);
+            node=node->left;
+        }else{
+            const Node* temp=st.top();
+            st.pop();
+            ans.push_back(temp->data);
+            node=temp->right;
+        }
+    }
+    return ans;
+}
+vector<int> preOrderIterative(const Node* root) {
+        // code here
+        vector<int> ans;
+        if(root==nullptr) return ans;
+        stack<const  Node*> st;
+        st.push(root);
+        while(!st.empty()){
+            const Node* node=st.top();
+            st.pop();
+            ans.push_back(node->data);
+            if(node->right) st.push(node->right);
+            if(node->left) st.push(node->left);
+        }
+        return ans;
+}
+vector<int> postOrderIterative(const Node* root) {
+        // code here
+    vector<int> ans;
+    if(root==nullptr) return ans;
+    stack<const Node*> st;
+    st.push(root);
+    while(!st.empty()){
+        const Node*  node=st.top();
+        st.pop();
+        ans.push_back(node->data);
+        if(node->left) st.push(node->left);
+        if(node->right) st.push(node->right);
+    }
+    reverse(ans.begin(),ans.end());
+    return ans;
+}
+vector<int> postOrderIterativeOneStack(const Node* root) {
+
+    vector<int> ans;
+    if (root == nullptr) return ans;
+
+    stack<const Node*> st;
+    const Node* node = root;
+
+    while (!st.empty() || node != nullptr) {
+
+        // Keep moving to the leftmost node.
+        // Push every node on the path so we can return later.
+        if (node != nullptr) {
+            st.push(node);
+            node = node->left;
+        }
+        else {
+
+            // We have reached the end of a left chain.
+            // Now check whether the current node has a right subtree.
+            const Node* temp = st.top()->right;
+
+            if (temp == nullptr) {
+
+                // No right subtree exists.
+                // Both left and right are done, so visit this node.
+                temp = st.top();
+                st.pop();
+                ans.push_back(temp->data);
+
+                // After visiting a node,
+                // it may be the right child of its parent.
+                // If yes, then the parent's entire subtree
+                // is also finished, so visit the parent too.
+                while (!st.empty() && st.top()->right == temp) {
+
+                    temp = st.top();
+                    st.pop();
+                    ans.push_back(temp->data);
+                }
+            }
+            else {
+
+                // Right subtree has not been processed yet.
+                // Move to the right subtree.
+                node = temp;
+            }
+        }
+    }
+
+    return ans;
+}
+
+vector<vector<int>> allTraversal(const Node* root){
+    vector<int> pre,in,post;
+    if(!root) return {pre,in,post};
+    stack<pair<const Node*,int>> st;
+    st.emplace(root,1);
+    while(!st.empty()){
+        auto &it = st.top();
+        if(it.second==1){
+            pre.push_back(it.first->data);
+            it.second++;
+            if(it.first->left) st.emplace(it.first->left,1);
+        }else if(it.second==2){
+            in.push_back(it.first->data);
+            it.second++;
+            if(it.first->right)st.emplace(it.first->right,1);
+        }else{
+            post.push_back(it.first->data);
+            st.pop();
+        }
+    }
+    return {pre,in,post};
 }
