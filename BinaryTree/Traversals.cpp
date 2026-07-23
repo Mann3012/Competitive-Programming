@@ -202,3 +202,33 @@ vector<vector<int>> allTraversal(const Node* root){
     }
     return {pre,in,post};
 }
+
+
+vector<vector<int>> verticalOrderTraversal(const Node* root){
+    map<int,map<int,multiset<int>>> nodes;
+    queue<pair<const Node*,pair<int,int>>> q;
+    q.push({root,{0,0}});
+    while(!q.empty()){
+        auto it=q.front();
+        q.pop();
+        const Node* node=it.first;
+        int x=it.second.first;
+        int y=it.second.second;
+        nodes[x][y].insert(node->data);
+        if(node->left){
+            q.push({node->left,{x-1,y+1}});
+        }
+        if(node->right){
+            q.push({node->right,{x+1,y+1}});
+        }
+    }
+    vector<vector<int>> ans;
+    for( const auto &p:nodes){
+        vector<int> col;
+        for(const auto &q:p.second){
+            col.insert(col.end(),q.second.begin(),q.second.end());
+        }
+        ans.push_back(col);
+    }
+    return ans;
+}
